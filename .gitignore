@@ -1,5 +1,4 @@
 .idea
 *.crt
 *.key
-server/settings.json
-server/run.sh
+*.bash
