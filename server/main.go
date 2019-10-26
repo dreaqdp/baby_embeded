@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"path"
 )
 
@@ -16,7 +17,7 @@ func homePageEndpoint(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	base := ""
+	base := os.Args[1]
 	http.HandleFunc("/", homePageEndpoint)
 	log.Fatal(http.ListenAndServeTLS(":2345", path.Join(base, "server.crt"), path.Join(base, "./server.key"), nil))
 }
