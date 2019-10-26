@@ -3,7 +3,7 @@
 #define left_1 7 // pin 11 L293D
 #define right_0 4 // pin 3 L293D
 #define right_1 5 // pin 6 L293D
-
+#define delay_time 500
 
 int m_dir; // master direction: 0 stop, 1 recto, 2 left, 3 right, 4 backwards
 
@@ -15,16 +15,39 @@ void setup(){
     pinMode(right_0, OUTPUT);
     pinMode(right_1, OUTPUT);
     Serial.begin(9600);
-    m_dir = 1;   
+    m_dir = 0;   
   
 }
 
+void direction (int a, int b, int c, int d) {
+    digitalWrite(left_0, a);
+    digitalWrite(left_1, b);
+    digitalWrite(right_0, c);
+    digitalWrite(right_1, d);
+    delay(delay_time); 
+}
 
 void loop(){
   
       //Motor Control - Motor A: motorPin1,motorpin2 & Motor B: motorpin3,motorpin4
-
+    switch (m_dir) {
+        case 1: // forward
+            direction (LOW, HIGH, LOW, HIGH);
+            break;
+        case 2: // left
+            direction (LOW, LOW, LOW, HIGH);
+            break;
+        case 3: // right
+            direction (LOW, HIGH, LOW, LOW);
+            break;
+        case 4: // backwards
+            direction (HIGH, LOW, HIGH, LOW);
+            break;
+        default:
+            direction (LOW, LOW, LOW, LOW);
+    }
     // back
+/*
     digitalWrite(left_0, HIGH);
     digitalWrite(left_1, LOW);
     digitalWrite(right_0, HIGH);
@@ -58,23 +81,12 @@ void loop(){
     digitalWrite(right_0, LOW);
     digitalWrite(right_1, LOW);
     delay(2000);
-    /*
-    //This code will turn Motor B clockwise for 2 sec.
-    digitalWrite(motorPin1, LOW);
-    digitalWrite(motorPin2, LOW);
-    digitalWrite(motorPin3, HIGH);
-    digitalWrite(motorPin4, LOW);
-    delay(2000); 
-    //This code will turn Motor B counter-clockwise for 2 sec.
-    digitalWrite(motorPin1, LOW);
-    digitalWrite(motorPin2, LOW);
-    digitalWrite(motorPin3, LOW);
-    digitalWrite(motorPin4, HIGH);
-    delay(2000);    
-    
-    //And this code will stop motors
-    digitalWrite(motorPin1, LOW);
-    digitalWrite(motorPin2, LOW);
-    digitalWrite(motorPin3, LOW);
-    digitalWrite(motorPin4, LOW);*/
+*/
+    if (Serial.available() > 0) {
+        int new_dir = Serial.read() - '0';
+        if (new_dir >= 0) m_dir = new_dir; 
+        // debug
+        Serial.print("direction: ");
+        Serial.println(m_dir, DEC);
+    }
 }
