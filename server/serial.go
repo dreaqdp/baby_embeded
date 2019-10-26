@@ -7,28 +7,6 @@ import (
 	"time"
 )
 
-//func sendArduinoCommand ( command byte, argument float32, serialPort io.ReadWriteCloser) error {
-//	if serialPort == nil {
-//		return nil
-//	}
-//
-//	bufOut := new(bytes.Buffer)
-//	err := binary.Write(bufOut, binary.LittleEndian, argument)
-//	if err != nil {
-//		return err
-//	}
-//	// Transmit command and argument down the pipe.
-//	for _, v := range [][]byte{[]byte{command}, bufOut.Bytes()} {
-//		log.Print(v)
-//		_, err = serialPort.Write(v)
-//		if err != nil {
-//			return err
-//		}
-//	}
-//
-//	return nil
-//}
-
 func GetArduinoSerial() io.ReadWriteCloser {
 	c := &goserial.Config{Name: "/dev/ttyACM0", Baud: 9600}
 	s, err := goserial.OpenPort(c)
