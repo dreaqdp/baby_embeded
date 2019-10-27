@@ -1,8 +1,8 @@
 // drive controller: L293D
-#define left_0 6 // pin 14 L293D
-#define left_1 7 // pin 11 L293D
-#define right_0 4 // pin 3 L293D
-#define right_1 5 // pin 6 L293D
+#define left_0 42 // pin 14 L293D
+#define left_1 43 // pin 11 L293D
+#define right_0 46 // pin 3 L293D
+#define right_1 47 // pin 6 L293D
 
 #define delay_time 500
 #define cry_time 1000
@@ -10,12 +10,15 @@
 // ultrasound sensor
 #define echo 8
 #define trig 9
-#define thres_dist 15
+#define thres_dist 10
+
+#define sound A4
 
 int m_dir; // master direction: 0 stop, 1 recto, 2 left, 3 right, 4 backwards
 long duration;
 int distance;
 int mode; // 0 run, 1 obstacle, 2 crazy
+unsigned long crazy_millis;
 
 void setup(){
  
@@ -42,7 +45,6 @@ void direction (int a, int b, int c, int d) {
 }
 
 void loop(){
-  
       //Motor Control - Motor A: motorPin1,motorpin2 & Motor B: motorpin3,motorpin4
     switch (m_dir) {
         case 1: // forward
@@ -61,6 +63,27 @@ void loop(){
             direction (LOW, LOW, LOW, LOW);
     }
 
+    switch (mode) {
+        case 1: // crash
+        //    m_dir = 0;
+        delay(cry_time);
+        delay(cry_time);
+        delay(cry_time);
+        delay(cry_time);
+        mode = 0;
+            break;
+        case 2: // crazy
+            m_dir = 2;
+            if ((millis() - crazy_millis) > 4000) {
+        Serial.print("time milis: ");
+               mode = 0;
+               m_dir = 1;
+            }
+            break;
+        //default: 
+
+    }
+
     // ultrasound code moment
     // Clears the trigPin
     digitalWrite(trig, LOW);
@@ -74,24 +97,37 @@ void loop(){
     // Calculating the distance
     distance= duration*0.034/2;
 
+    // sound sensor code moment
+    int sound_lvl = analogRead(A4);
+
+    // mode selection
     if (distance < thres_dist) {
         mode = 1;
-        m_dir = 0;
-        delay(cry_time);
-        delay(cry_time);
-        delay(cry_time);
-        delay(cry_time);
-        delay(cry_time);
+        m_dir = 0; //vigilar, puede no parar y hacer el delay
     }
-    else mode = 0;
+    else if (sound_lvl > 51) {
+        mode = 2;
+        m_dir = 2;
+        crazy_millis = millis();
+
+    }
+    else
+        mode = 0;
 
         // debug
-        Serial.print("distance: ");
-        Serial.println(distance, DEC);
+        Serial.print("sound: ");
+        Serial.println(sound_lvl, DEC);
+
 
     if (Serial.available() > 0) {
         int new_dir = Serial.read() - '0';
-        if (mode == 0 && new_dir >= 0) m_dir = new_dir; 
-        else if (mode == 1 && new_dir == 4) m_dir = new_dir;
+        if (mode == 0 && new_dir >= 0) 
+            m_dir = new_dir; 
+        else if (mode == 1 && new_dir == 4) 
+            m_dir = new_dir;
+        else if (mode == 2) 
+            Serial.write(mode+3); // 5 for the server
+        Serial.print("dir: ");
+        Serial.println(m_dir, DEC);
     }
 }
