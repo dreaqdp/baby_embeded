@@ -13,6 +13,14 @@ func homePageEndpoint(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Print("conn to home")
 }
+func audioEndpoint(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		log.Print("Error parsing audio post")
+	} else {
+		//	url := r.Form.Get("yt")
+	}
+
+}
 
 func stopEndpoint(w http.ResponseWriter, r *http.Request) {
 	m.toSend <- '0'

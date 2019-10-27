@@ -13,7 +13,7 @@ func GetArduinoSerial() io.ReadWriteCloser {
 	if err != nil {
 		log.Println("Error opening serial port")
 		log.Printf("Error was: %s", err.Error())
-		log.Fatal("adiosito")
+		//		log.Fatal("adiosito")
 	}
 
 	time.Sleep(1 * time.Second)
@@ -24,6 +24,7 @@ type ArduinoManager struct {
 	serial    io.ReadWriteCloser
 	toSend    chan byte
 	toRequest chan byte
+	player    *Player
 }
 
 func NewArduinoManager() *ArduinoManager {
@@ -31,6 +32,7 @@ func NewArduinoManager() *ArduinoManager {
 		serial:    GetArduinoSerial(),
 		toSend:    make(chan (byte)),
 		toRequest: make(chan (byte)),
+		player:    NewPlayer(),
 	}
 }
 
@@ -39,7 +41,7 @@ func (m *ArduinoManager) attendReq() {
 		select {
 		case req := <-m.toRequest:
 			if req == 'c' {
-				log.Print("Colision was detected by ardu :(")
+				m.player.PlayLock("assets/cry.mp3")
 			} else {
 				log.Printf("Error command %s was not understand", req)
 			}
@@ -68,6 +70,5 @@ func (m *ArduinoManager) run() {
 				m.toRequest <- readBuf[i]
 			}
 		}
-
 	}
 }
