@@ -17,5 +17,6 @@ func main() {
 	http.HandleFunc("/left", leftEndpoint)
 	http.HandleFunc("/right", rightEndpoint)
 	http.HandleFunc("/stop", stopEndpoint)
+	http.HandleFunc("/play", audioEndpoint)
 	log.Fatal(http.ListenAndServe(":2345", nil))
 }

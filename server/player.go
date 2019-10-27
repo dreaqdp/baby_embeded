@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/vburenin/nsync"
 	"log"
 	"os/exec"
@@ -46,9 +47,25 @@ func (pl Player) Play(path string) {
 func (pl Player) PlayLock(path string) {
 	pl.lock.Lock()
 	pl.StopPlay()
+	pl.proc = exec.Command("mpg123", path)
 	if err := pl.proc.Run(); err != nil {
 		log.Print("Failed to play music")
 		log.Print("Error was: ", err.Error())
 	}
 	pl.lock.Unlock()
+}
+
+func (pl Player) PlayYoutube(url string) {
+	if pl.lock.TryLock() {
+		pl.lock.Unlock()
+		pl.StopPlay()
+		c := fmt.Sprintf("rm -rf /tmp/s.mp3 && youtube-dl -x --audio-format mp3 %s -o /tmp/s.mp3 && mpg123 /tmp/s.mp3", url)
+
+		log.Print("Executing ", c)
+		pl.proc = exec.Command("/bin/sh", "-c", c)
+		if err := pl.proc.Start(); err != nil {
+			log.Print("Failed to play from youtube")
+			log.Print("Error was: ", err.Error())
+		}
+	}
 }

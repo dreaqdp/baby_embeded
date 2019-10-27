@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,11 +15,20 @@ func homePageEndpoint(w http.ResponseWriter, r *http.Request) {
 	log.Print("conn to home")
 }
 func audioEndpoint(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		log.Print("Error parsing audio post")
-	} else {
-		//	url := r.Form.Get("yt")
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+
+	url := struct {
+		Url string `json:"yt"`
+	}{}
+
+	if err := d.Decode(&url); err != nil {
+		log.Print("Unrecognized json")
+		return
 	}
+
+	log.Print("Playing ", url.Url)
+	m.music <- url.Url
 
 }
 

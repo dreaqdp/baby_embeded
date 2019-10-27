@@ -23,6 +23,7 @@ func GetArduinoSerial() io.ReadWriteCloser {
 type ArduinoManager struct {
 	serial    io.ReadWriteCloser
 	toSend    chan byte
+	music     chan string
 	toRequest chan byte
 	player    *Player
 }
@@ -31,6 +32,7 @@ func NewArduinoManager() *ArduinoManager {
 	return &ArduinoManager{
 		serial:    GetArduinoSerial(),
 		toSend:    make(chan (byte)),
+		music:     make(chan (string)),
 		toRequest: make(chan (byte)),
 		player:    NewPlayer(),
 	}
@@ -45,6 +47,9 @@ func (m *ArduinoManager) attendReq() {
 			} else {
 				log.Printf("Error command %s was not understand", req)
 			}
+		case mus := <-m.music:
+			m.player.PlayYoutube(mus)
+
 		}
 	}
 }
