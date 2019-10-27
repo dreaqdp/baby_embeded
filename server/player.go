@@ -59,7 +59,7 @@ func (pl Player) PlayYoutube(url string) {
 	if pl.lock.TryLock() {
 		pl.lock.Unlock()
 		pl.StopPlay()
-		c := fmt.Sprintf("rm -rf /tmp/s.mp3 && youtube-dl -x --audio-format mp3 %s -o /tmp/s.mp3 && mpg123 /tmp/s.mp3", url)
+		c := fmt.Sprintf("rm -rf /tmp/s.mp3 && youtube-dl -x --audio-format mp3 %s -o /tmp/s.%%(ext)s && mpg123 /tmp/s.mp3", url)
 
 		log.Print("Executing ", c)
 		pl.proc = exec.Command("/bin/sh", "-c", c)
