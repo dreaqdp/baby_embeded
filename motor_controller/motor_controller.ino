@@ -3,9 +3,19 @@
 #define left_1 7 // pin 11 L293D
 #define right_0 4 // pin 3 L293D
 #define right_1 5 // pin 6 L293D
+
 #define delay_time 500
+#define cry_time 1000
+
+// ultrasound sensor
+#define echo 8
+#define trig 9
+#define thres_dist 15
 
 int m_dir; // master direction: 0 stop, 1 recto, 2 left, 3 right, 4 backwards
+long duration;
+int distance;
+int mode; // 0 run, 1 obstacle, 2 crazy
 
 void setup(){
  
@@ -14,8 +24,12 @@ void setup(){
     pinMode(left_1, OUTPUT);
     pinMode(right_0, OUTPUT);
     pinMode(right_1, OUTPUT);
+
+    pinMode(trig, OUTPUT);
+    pinMode(echo, INPUT);
     Serial.begin(9600);
-    m_dir = 0;   
+    m_dir = 1;   
+    mode = 1;
   
 }
 
@@ -46,47 +60,38 @@ void loop(){
         default:
             direction (LOW, LOW, LOW, LOW);
     }
-    // back
-/*
-    digitalWrite(left_0, HIGH);
-    digitalWrite(left_1, LOW);
-    digitalWrite(right_0, HIGH);
-    digitalWrite(right_1, LOW);
-    delay(2000); 
 
-    // right
-    digitalWrite(left_0, LOW);
-    digitalWrite(left_1, HIGH);
-    digitalWrite(right_0, LOW);
-    digitalWrite(right_1, LOW);
-    delay(2000);
+    // ultrasound code moment
+    // Clears the trigPin
+    digitalWrite(trig, LOW);
+    delayMicroseconds(2);
+    // Sets the trigPin on HIGH state for 10 micro seconds
+    digitalWrite(trig, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trig, LOW);
+    // Reads the echoPin, returns the sound wave travel time in microseconds
+    duration = pulseIn(echo, HIGH);
+    // Calculating the distance
+    distance= duration*0.034/2;
 
-    // left
-    digitalWrite(left_0, LOW);
-    digitalWrite(left_1, LOW);
-    digitalWrite(right_0, LOW);
-    digitalWrite(right_1, HIGH);
-    delay(2000);
+    if (distance < thres_dist) {
+        mode = 1;
+        m_dir = 0;
+        delay(cry_time);
+        delay(cry_time);
+        delay(cry_time);
+        delay(cry_time);
+        delay(cry_time);
+    }
+    else mode = 0;
 
-    // forwards
-    digitalWrite(left_0, LOW);
-    digitalWrite(left_1, HIGH);
-    digitalWrite(right_0, LOW);
-    digitalWrite(right_1, HIGH);
-    delay(2000);
+        // debug
+        Serial.print("distance: ");
+        Serial.println(distance, DEC);
 
-    // stop
-    digitalWrite(left_0, LOW);
-    digitalWrite(left_1, LOW);
-    digitalWrite(right_0, LOW);
-    digitalWrite(right_1, LOW);
-    delay(2000);
-*/
     if (Serial.available() > 0) {
         int new_dir = Serial.read() - '0';
-        if (new_dir >= 0) m_dir = new_dir; 
-        // debug
-        Serial.print("direction: ");
-        Serial.println(m_dir, DEC);
+        if (mode == 0 && new_dir >= 0) m_dir = new_dir; 
+        else if (mode == 1 && new_dir == 4) m_dir = new_dir;
     }
 }
